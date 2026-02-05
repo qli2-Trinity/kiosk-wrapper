@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Kiosk Start</title>
+
+  <script>
+    // === CONFIGURATION ===
+    const VENDOR_URL = "https://nexus.trinity.unimelb.edu.au/support/tickets/new";
+    const HOME_URL   = "https://qli2-Trinity.github.io/kiosk-wrapper/start.html";
+
+    const IDLE_TIMEOUT_MS = 3 * 60 * 1000; // 3 minutes
+    const AUTO_LAUNCH_DELAY_MS = 2000;     // 2 seconds
+
+    let idleTimer;
+
+    function resetIdleTimer() {
+      clearTimeout(idleTimer);
+      idleTimer = setTimeout(() => {
+        window.location.replace(HOME_URL);
+      }, IDLE_TIMEOUT_MS);
+    }
+
+    function launchVendor() {
+      window.location.replace(VENDOR_URL);
+    }
+
+    ["mousemove", "mousedown", "touchstart", "keydown"].forEach(evt => {
+      document.addEventListener(evt, resetIdleTimer, true);
+    });
+
+    window.onload = () => {
+      resetIdleTimer();
+      setTimeout(launchVendor, AUTO_LAUNCH_DELAY_MS);
+    };
+  </script>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      background: #003366;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Loading, please wait…</h1>
+</body>
+</html>
