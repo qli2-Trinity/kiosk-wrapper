@@ -3,20 +3,27 @@
 <head>
   <meta charset="utf-8" />
   <title>Kiosk Start</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <script>
+ 
     // === CONFIGURATION ===
     const VENDOR_URL = "https://nexus.trinity.unimelb.edu.au/support/tickets/new";
     const HOME_URL   = "https://qli2-Trinity.github.io/kiosk-wrapper/start.html";
+    // ============================================
 
-    const IDLE_TIMEOUT_MS = 3 * 60 * 1000; // 3 minutes
-    const AUTO_LAUNCH_DELAY_MS = 2000;     // 2 seconds
+    // Idle timeout: 1 minute with no activity (mouse, touch, keyboard)
+    const IDLE_TIMEOUT_MS = 1 * 60 * 1000; // 60,000 ms
+    // Small delay before launching the vendor page, to show the friendly message
+    const AUTO_LAUNCH_DELAY_MS = 1500; // 1.5 seconds
 
     let idleTimer;
 
     function resetIdleTimer() {
       clearTimeout(idleTimer);
       idleTimer = setTimeout(() => {
+        // Return to the start page after 1 minute of inactivity
+        // replace() avoids building history so Back won’t go to the vendor page
         window.location.replace(HOME_URL);
       }, IDLE_TIMEOUT_MS);
     }
@@ -25,31 +32,56 @@
       window.location.replace(VENDOR_URL);
     }
 
-    ["mousemove", "mousedown", "touchstart", "keydown"].forEach(evt => {
-      document.addEventListener(evt, resetIdleTimer, true);
+    // Count these as "activity" (resets the idle timer)
+    ["mousemove", "mousedown", "touchstart", "keydown", "wheel"].forEach(evt => {
+      document.addEventListener(evt, resetIdleTimer, { passive: true, capture: true });
     });
 
-    window.onload = () => {
+    // Start the idle timer immediately and launch the vendor site after a short, friendly pause
+    window.addEventListener("load", () => {
       resetIdleTimer();
       setTimeout(launchVendor, AUTO_LAUNCH_DELAY_MS);
-    };
+    });
   </script>
 
   <style>
-    body {
+    :root {
+      color-scheme: light;
+    }
+    html, body {
+      height: 100%;
       margin: 0;
-      font-family: sans-serif;
-      background: #003366;
-      color: white;
+      background: #ffffff; /* white background */
+      color: #000000;       /* black text */
+      font-family: Arial, Helvetica, sans-serif;
+    }
+    .wrap {
+      min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      height: 100vh;
+      text-align: center;
+      padding: 2rem;
+    }
+    .message {
+      font-size: 1.75rem; /* bigger friendly text */
+      line-height: 1.4;
+    }
+    .sub {
+      margin-top: 0.5rem;
+      font-size: 1rem;
+      color: #333;
     }
   </style>
 </head>
 
 <body>
-  <h1>Loading, please wait…</h1>
+  <div class="wrap" role="main" aria-live="polite" aria-busy="true">
+    <div>
+      <div class="message">Loading your service, please wait…</div>
+      <div class="sub">This kiosk will return to the start screen after 1 minute of inactivity.</div>
+    </div>
+  </div>
 </body>
 </html>
+``
